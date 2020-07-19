@@ -6,7 +6,8 @@
 
 If you enjoy using `windmove`, this package is an add-on for you: it
 has variants of the `windmove` commands which swap the buffers as you
-move, so that you get the effect of "dragging" around.
+move, so that you get the effect of "dragging" windows around
+directionally with the arrow keys.
 
 ## Installation
 
