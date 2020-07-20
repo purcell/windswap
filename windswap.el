@@ -6,7 +6,7 @@
 ;; Homepage: https://github.com/purcell/windswap
 ;; Keywords: frames, convenience
 ;; Package-Version: 0
-;; Package-Requires: ((emacs "24.1"))
+;; Package-Requires: ((emacs "24.3"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 ;;; Code:
 
 (require 'windmove)
+(require 'cl-lib)
 
 (defgroup windswap nil
   "Like windmove, but swaps buffers while moving point."
@@ -54,46 +55,76 @@ See also `windmove-default-keybindings'."
   (global-set-key (vector (append modifiers '(up)))    'windswap-up)
   (global-set-key (vector (append modifiers '(down)))  'windswap-down))
 
-(defun windswap--with-swap-window-buffers (func &optional args)
-  "Run FUNC with ARGS, swapping window buffers afterwards."
+(defun windswap--find-other-window (direction sign)
+  "Find the swappable window in DIRECTION.
+Unlike the `windmove' equivalent, this skips over the minibuffer
+and any dedicated windows, because the contents of those windows
+cannot be swapped.  SIGN is as per that named argument in
+`window-in-direction'.  This function honours the variable
+`windmove-wrap-around'."
+  (let* ((dir (cond
+               ((eq direction 'up) 'above)
+               ((eq direction 'down) 'below)
+               (t direction)))
+         (initial (selected-window))
+         (window initial))
+    (cl-block nil
+      (while t
+        (setq window (window-in-direction dir window nil sign windmove-wrap-around t))
+        (when (or (null window)
+                  (eq initial window)
+                  (not (window-minibuffer-p window)))
+          (cl-return window))))))
+
+(defun windswap--check-window (window)
+  "Report a user error if WINDOW cannot be swapped."
+  (when (window-minibuffer-p window)
+    (user-error "Can't swap the minibuffer window"))
+  (when (window-dedicated-p window)
+    (user-error "Dedicated windows can't be swapped")))
+
+(defun windswap--do-swap (direction arg)
+  "Try to swap in DIRECTION.
+ARG is as for the `windmove' commands."
   (let ((initial (selected-window)))
-    (prog1
-        (apply func args)
-      (let ((new (selected-window)))
-        (unless (eq initial new)
-          (let ((initial-buf (window-buffer initial))
-                (new-buf (window-buffer new)))
-            (unless (eq initial-buf new-buf)
-              (set-window-buffer initial new-buf)
-              (set-window-buffer new initial-buf))))))))
+    (windswap--check-window initial)
+    (let ((new (windswap--find-other-window direction arg)))
+      (unless new
+        (user-error "No swappable window %s from selected window" direction))
+      (windswap--check-window new)
+      (select-window new)
+      (let ((initial-buf (window-buffer initial))
+            (new-buf (window-buffer new)))
+        (set-window-buffer initial new-buf)
+        (set-window-buffer new initial-buf)))))
 
 ;;;###autoload
 (defun windswap-right (&optional arg)
   "Like `windmove-right', but transpose buffers after switching windows.
 ARG is as for that function."
   (interactive "P")
-  (windswap--with-swap-window-buffers 'windmove-right arg))
+  (windswap--do-swap 'right arg))
 
 ;;;###autoload
 (defun windswap-left (&optional arg)
   "Like `windmove-left', but transpose buffers after switching windows.
 ARG is as for that function."
   (interactive "P")
-  (windswap--with-swap-window-buffers 'windmove-left arg))
+  (windswap--do-swap 'left arg))
 
 ;;;###autoload
 (defun windswap-up (&optional arg)
   "Like `windmove-up', but transpose buffers after switching windows.
 ARG is as for that function."
   (interactive "P")
-  (windswap--with-swap-window-buffers 'windmove-up arg))
+  (windswap--do-swap 'up arg))
 
 ;;;###autoload
 (defun windswap-down (&optional arg)
   "Like `windmove-down', but transpose buffers after switching windows.
 ARG is as for that function."
   (interactive "P")
-  (windswap--with-swap-window-buffers 'windmove-down arg))
+  (windswap--do-swap 'down arg))
 
 
 (provide 'windswap)
