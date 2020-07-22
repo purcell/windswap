@@ -83,6 +83,15 @@ cannot be swapped.  SIGN is as per that named argument in
   (when (window-dedicated-p window)
     (user-error "Dedicated windows can't be swapped")))
 
+(defalias 'windswap--swap-states
+  (if (fboundp 'window-swap-states)
+      'window-swap-states
+    (lambda (a b)
+      (let ((buf-b (window-buffer b))
+            (buf-a (window-buffer a)))
+        (set-window-buffer a buf-b)
+        (set-window-buffer b buf-a)))))
+
 (defun windswap--do-swap (direction arg)
   "Try to swap in DIRECTION.
 ARG is as for the `windmove' commands."
@@ -92,11 +101,8 @@ ARG is as for the `windmove' commands."
       (unless new
         (user-error "No swappable window %s from selected window" direction))
       (windswap--check-window new)
-      (select-window new)
-      (let ((initial-buf (window-buffer initial))
-            (new-buf (window-buffer new)))
-        (set-window-buffer initial new-buf)
-        (set-window-buffer new initial-buf)))))
+      (windswap--swap-states initial new)
+      (select-window new))))
 
 ;;;###autoload
 (defun windswap-right (&optional arg)
