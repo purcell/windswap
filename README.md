@@ -9,6 +9,11 @@ has variants of the `windmove` commands which swap the buffers as you
 move, so that you get the effect of "dragging" windows around
 directionally with the arrow keys.
 
+_Update: as of Emacs 27.1, there are `windmove-swap-*` commands that
+are mostly identical to this package, with the exception that they
+will happily swap the contents of dedicated windows, while `windswap`
+refuses to do so: this seems like a better behaviour to me._
+
 ## Installation
 
 You can install `windswap` from the
