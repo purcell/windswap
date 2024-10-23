@@ -35,9 +35,6 @@ jobs:
           - 29.1
           - snapshot
     steps:
-    - uses: cachix/install-nix-action@V27
-      with:
-        nix_path: nixpkgs=channel:nixos-unstable
     - uses: purcell/setup-emacs@master
       with:
         version: ${{ matrix.emacs_version }}
