@@ -1,5 +1,6 @@
 [![Melpa Status](http://melpa.org/packages/windswap-badge.svg)](http://melpa.org/#/windswap)
 [![Melpa Stable Status](http://stable.melpa.org/packages/windswap-badge.svg)](http://stable.melpa.org/#/windswap)
+[![Build Status](https://github.com/purcell/windswap/actions/workflows/test.yml/badge.svg)](https://github.com/purcell/windswap/actions/workflows/test.yml)
 <a href="https://www.patreon.com/sanityinc"><img alt="Support me" src="https://img.shields.io/badge/Support%20Me-%F0%9F%92%97-ff69b4.svg"></a>
 
 # Swap Emacs windows with their neighbours
