@@ -13,7 +13,7 @@ jobs:
     - uses: purcell/setup-emacs@master
       with:
         version: 29.1
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Run tests
       run: make package-lint
 
@@ -38,6 +38,6 @@ jobs:
     - uses: purcell/setup-emacs@master
       with:
         version: ${{ matrix.emacs_version }}
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Run tests
       run: make compile
